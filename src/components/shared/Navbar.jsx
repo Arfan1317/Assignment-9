@@ -4,15 +4,15 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { FiBell, FiChevronDown, FiLogOut, FiUser } from "react-icons/fi";
+import { FiBell, FiChevronDown, FiLogOut, FiUser, FiMenu, FiX } from "react-icons/fi";
 
 export default function Navbar() {
   const pathname = usePathname();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); 
 
-  
   const user = null; 
-  
+ 
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "All Appointments", path: "/appointments" },
@@ -23,7 +23,6 @@ export default function Navbar() {
     <nav className="bg-white shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 max-w-7xl h-20 flex items-center justify-between">
         
-      
         <Link href="/" className="flex items-center">
           <Image 
             src="/NavbarLogo.png" 
@@ -34,7 +33,6 @@ export default function Navbar() {
           />
         </Link>
 
-        
         <div className="hidden md:flex items-center space-x-8">
           {navLinks.map((link) => {
             const isActive = pathname === link.path;
@@ -47,7 +45,7 @@ export default function Navbar() {
                 }`}
               >
                 {link.name}
-              
+               
                 {isActive && (
                   <span className="absolute bottom-0 left-0 w-full h-[2px] bg-[#0b6654] rounded-t-md"></span>
                 )}
@@ -57,9 +55,9 @@ export default function Navbar() {
         </div>
 
        
-        <div className="flex items-center space-x-6">
+        <div className="hidden md:flex items-center space-x-6">
           {!user ? (
-           
+            
             <div className="flex items-center space-x-4">
               <Link 
                 href="/login" 
@@ -77,12 +75,10 @@ export default function Navbar() {
           ) : (
             
             <div className="flex items-center space-x-5">
-            
               <button className="text-gray-500 hover:text-[#0b6654] transition-colors">
                 <FiBell size={22} />
               </button>
 
-             
               <div className="relative">
                 <button 
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -98,7 +94,6 @@ export default function Navbar() {
                   <FiChevronDown className="text-gray-500" />
                 </button>
 
-                
                 {isDropdownOpen && (
                   <div className="absolute right-0 mt-3 w-48 bg-white rounded-md shadow-lg py-2 border border-gray-100">
                     <Link 
@@ -109,10 +104,7 @@ export default function Navbar() {
                       <FiUser className="mr-3" /> Dashboard
                     </Link>
                     <button 
-                      onClick={() => {
-                        setIsDropdownOpen(false);
-                       
-                      }}
+                      onClick={() => setIsDropdownOpen(false)}
                       className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                     >
                       <FiLogOut className="mr-3" /> Logout
@@ -124,7 +116,86 @@ export default function Navbar() {
           )}
         </div>
 
+        <div className="md:hidden flex items-center">
+          <button 
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+            className="text-[#0b6654] hover:text-[#095243] focus:outline-none transition-colors"
+          >
+            {isMobileMenuOpen ? <FiX size={28} /> : <FiMenu size={28} />}
+          </button>
+        </div>
       </div>
+
+      {isMobileMenuOpen && (
+        <div className="md:hidden bg-white border-t border-gray-100 shadow-lg absolute w-full left-0">
+          <div className="flex flex-col px-4 pt-4 pb-6 space-y-4">
+           
+            {navLinks.map((link) => {
+              const isActive = pathname === link.path;
+              return (
+                <Link
+                  key={link.path}
+                  href={link.path}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`font-medium text-base py-2 block ${
+                    isActive ? "text-[#0b6654]" : "text-gray-600 hover:text-[#0b6654]"
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              );
+            })}
+
+            <hr className="border-gray-100" />
+
+            {!user ? (
+              <div className="flex flex-col space-y-3 pt-2">
+                <Link 
+                  href="/login" 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="font-medium text-center text-gray-700 hover:text-[#0b6654] py-2.5 border border-gray-200 rounded"
+                >
+                  Login
+                </Link>
+                <Link 
+                  href="/register" 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="bg-[#0b6654] text-center text-white px-5 py-2.5 rounded font-medium hover:bg-[#095243]"
+                >
+                  Register
+                </Link>
+              </div>
+            ) : (
+              <div className="flex flex-col space-y-4 pt-2">
+                <div className="flex items-center space-x-3 mb-2">
+                  <Image 
+                    src={user.photo} 
+                    alt="User Profile" 
+                    width={40} 
+                    height={40} 
+                    className="rounded-full object-cover border border-gray-200"
+                  />
+                  <span className="font-medium text-[#112a36]">{user.name}</span>
+                </div>
+                <Link 
+                  href="/dashboard" 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center text-gray-700 hover:text-[#0b6654]"
+                >
+                  <FiUser className="mr-3" /> Dashboard
+                </Link>
+                <button 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center text-left text-red-600 hover:text-red-700"
+                >
+                  <FiLogOut className="mr-3" /> Logout
+                </button>
+              </div>
+            )}
+            
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
