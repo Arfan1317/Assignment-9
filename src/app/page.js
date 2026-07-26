@@ -1,14 +1,18 @@
 import HeroBanner from "@/components/home/HeroBanner";
+import TopRatedDoctors from "@/components/home/TopRatedDoctors";
+import WhyChooseUs from "@/components/home/WhyChooseUs";
 
 export default function Home() {
   return (
     <div className="min-h-screen">
+      
       <HeroBanner />
       
-      {/* 
-        The Top Rated Doctors section will go here next!
-      */}
+     
+      <TopRatedDoctors />
       
+     
+      <WhyChooseUs />
     </div>
   );
 }
