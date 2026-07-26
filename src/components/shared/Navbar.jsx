@@ -1,0 +1,130 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { FiBell, FiChevronDown, FiLogOut, FiUser } from "react-icons/fi";
+
+export default function Navbar() {
+  const pathname = usePathname();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  
+  const user = null; 
+  
+  const navLinks = [
+    { name: "Home", path: "/" },
+    { name: "All Appointments", path: "/appointments" },
+    { name: "Doctors", path: "/doctors" },
+  ];
+
+  return (
+    <nav className="bg-white shadow-sm sticky top-0 z-50">
+      <div className="container mx-auto px-4 max-w-7xl h-20 flex items-center justify-between">
+        
+      
+        <Link href="/" className="flex items-center">
+          <Image 
+            src="/NavbarLogo.png" 
+            alt="DocAppoint Logo" 
+            width={180} 
+            height={40} 
+            className="object-contain"
+          />
+        </Link>
+
+        
+        <div className="hidden md:flex items-center space-x-8">
+          {navLinks.map((link) => {
+            const isActive = pathname === link.path;
+            return (
+              <Link
+                key={link.path}
+                href={link.path}
+                className={`font-medium text-sm transition-all duration-300 relative py-2 ${
+                  isActive ? "text-[#0b6654]" : "text-gray-600 hover:text-[#0b6654]"
+                }`}
+              >
+                {link.name}
+              
+                {isActive && (
+                  <span className="absolute bottom-0 left-0 w-full h-[2px] bg-[#0b6654] rounded-t-md"></span>
+                )}
+              </Link>
+            );
+          })}
+        </div>
+
+       
+        <div className="flex items-center space-x-6">
+          {!user ? (
+           
+            <div className="flex items-center space-x-4">
+              <Link 
+                href="/login" 
+                className="font-medium text-gray-700 hover:text-[#0b6654] transition-colors"
+              >
+                Login
+              </Link>
+              <Link 
+                href="/register" 
+                className="bg-[#0b6654] text-white px-5 py-2.5 rounded font-medium hover:bg-[#095243] transition-colors"
+              >
+                Register
+              </Link>
+            </div>
+          ) : (
+            
+            <div className="flex items-center space-x-5">
+            
+              <button className="text-gray-500 hover:text-[#0b6654] transition-colors">
+                <FiBell size={22} />
+              </button>
+
+             
+              <div className="relative">
+                <button 
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center space-x-2 focus:outline-none"
+                >
+                  <Image 
+                    src={user.photo} 
+                    alt="User Profile" 
+                    width={40} 
+                    height={40} 
+                    className="rounded-full object-cover border border-gray-200"
+                  />
+                  <FiChevronDown className="text-gray-500" />
+                </button>
+
+                
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-3 w-48 bg-white rounded-md shadow-lg py-2 border border-gray-100">
+                    <Link 
+                      href="/dashboard" 
+                      onClick={() => setIsDropdownOpen(false)}
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#0b6654]"
+                    >
+                      <FiUser className="mr-3" /> Dashboard
+                    </Link>
+                    <button 
+                      onClick={() => {
+                        setIsDropdownOpen(false);
+                       
+                      }}
+                      className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                    >
+                      <FiLogOut className="mr-3" /> Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+      </div>
+    </nav>
+  );
+}
