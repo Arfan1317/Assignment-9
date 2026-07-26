@@ -53,13 +53,34 @@ export default function AuthProvider({ children }) {
     return signOut(auth);
   };
 
- 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
-      console.log("Current Authenticated User:", currentUser);
       
-     
+      if (currentUser?.email) {
+       
+        try {
+          const response = await fetch("/api/jwt", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email: currentUser.email }),
+          });
+          
+          const data = await response.json();
+
+          if (data.token) {
+            
+            localStorage.setItem("access-token", data.token);
+          }
+        } catch (error) {
+          console.error("Error fetching JWT:", error);
+        }
+      } else {
+        
+        localStorage.removeItem("access-token");
+      }
       
       setLoading(false);
     });
