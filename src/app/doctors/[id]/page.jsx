@@ -55,7 +55,7 @@ export default function DoctorDetailsPage() {
 
     try {
     
-      const response = await fetch("http://localhost:5000/bookings", {
+     const response = await fetch("https://assignment-9-server-plum.vercel.app/bookings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
