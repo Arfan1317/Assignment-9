@@ -18,7 +18,7 @@ export default function MyBookingsPage() {
       if (user?.email) {
         try {
           setIsLoading(true);
-          const res = await fetch(`http://localhost:5000/bookings/${user.email}`);
+          const res = await fetch(`https://assignment-9-server-plum.vercel.app/bookings/${user.email}`);
           const data = await res.json();
           
           if (data.success) {
@@ -35,12 +35,11 @@ export default function MyBookingsPage() {
     fetchMyBookings();
   }, [user?.email]);
 
- 
   const handleDelete = async (id) => {
     const isConfirmed = window.confirm("Are you sure you want to delete this appointment?");
     if (isConfirmed) {
       try {
-        const res = await fetch(`http://localhost:5000/bookings/${id}`, {
+        const res = await fetch(`https://assignment-9-server-plum.vercel.app/bookings/${id}`, {
           method: 'DELETE'
         });
         const data = await res.json();
@@ -55,7 +54,6 @@ export default function MyBookingsPage() {
     }
   };
 
- 
   const handleOpenUpdate = (booking) => {
     setSelectedBooking(booking);
     setIsUpdateModalOpen(true);
@@ -73,7 +71,7 @@ export default function MyBookingsPage() {
     };
 
     try {
-      const res = await fetch(`http://localhost:5000/bookings/${selectedBooking._id}`, {
+      const res = await fetch(`https://assignment-9-server-plum.vercel.app/bookings/${selectedBooking._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
