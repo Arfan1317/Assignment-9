@@ -12,7 +12,6 @@ import {
 } from "firebase/auth";
 import { auth } from "@/firebase/firebase.config";
 
-
 export const AuthContext = createContext(null);
 
 export default function AuthProvider({ children }) {
@@ -21,13 +20,11 @@ export default function AuthProvider({ children }) {
 
   const googleProvider = new GoogleAuthProvider();
 
-  
   const createUser = (email, password) => {
     setLoading(true);
     return createUserWithEmailAndPassword(auth, email, password);
   };
 
-  
   const updateUserProfile = (name, photo) => {
     return updateProfile(auth.currentUser, {
       displayName: name,
@@ -35,19 +32,16 @@ export default function AuthProvider({ children }) {
     });
   };
 
-  
   const signIn = (email, password) => {
     setLoading(true);
     return signInWithEmailAndPassword(auth, email, password);
   };
 
-  
   const googleSignIn = () => {
     setLoading(true);
     return signInWithPopup(auth, googleProvider);
   };
 
-  
   const logOut = () => {
     setLoading(true);
     return signOut(auth);
@@ -58,27 +52,9 @@ export default function AuthProvider({ children }) {
       setUser(currentUser);
       
       if (currentUser?.email) {
-       
-        try {
-          const response = await fetch("/api/jwt", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ email: currentUser.email }),
-          });
-          
-          const data = await response.json();
-
-          if (data.token) {
-            
-            localStorage.setItem("access-token", data.token);
-          }
-        } catch (error) {
-          console.error("Error fetching JWT:", error);
-        }
+        // We temporarily removed the JWT fetch here so it stops crashing!
+        console.log("User logged in:", currentUser.email);
       } else {
-        
         localStorage.removeItem("access-token");
       }
       
