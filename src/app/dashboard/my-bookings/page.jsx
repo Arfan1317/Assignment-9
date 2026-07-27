@@ -1,67 +1,106 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useContext } from "react";
 import toast from "react-hot-toast";
 import { FiBell, FiX } from "react-icons/fi";
+import { AuthContext } from "@/providers/AuthProvider";
 
 export default function MyBookingsPage() {
-  const [bookings, setBookings] = useState([
-    {
-      _id: "b1",
-      doctorName: "Dr. Ayesha Rahman",
-      specialty: "Cardiologist",
-      image: "/Dr.AyeshaRahman.png",
-      date: "2026-05-12",
-      time: "09:00 AM",
-      patientName: "Rahim Uddin",
-      phone: "01712345678",
-      status: "Confirmed"
-    },
-    {
-      _id: "b2",
-      doctorName: "Dr. Rafiq Ahmed",
-      specialty: "Dermatologist",
-      image: "/Dr.RafiqAhmed.png",
-      date: "2026-05-30",
-      time: "02:00 PM",
-      patientName: "Rahim Uddin",
-      phone: "01712345678",
-      status: "Pending"
-    }
-  ]);
-
+  const { user } = useContext(AuthContext);
+  
+  const [bookings, setBookings] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 
-  const handleDelete = (id) => {
+  useEffect(() => {
+    const fetchMyBookings = async () => {
+      if (user?.email) {
+        try {
+          setIsLoading(true);
+          const res = await fetch(`http://localhost:5000/bookings/${user.email}`);
+          const data = await res.json();
+          
+          if (data.success) {
+            setBookings(data.data);
+          }
+        } catch (error) {
+          toast.error("Failed to load appointments");
+        } finally {
+          setIsLoading(false); 
+        }
+      }
+    };
+
+    fetchMyBookings();
+  }, [user?.email]);
+
+ 
+  const handleDelete = async (id) => {
     const isConfirmed = window.confirm("Are you sure you want to delete this appointment?");
     if (isConfirmed) {
-      setBookings(bookings.filter((b) => b._id !== id));
-      toast.success("Appointment deleted successfully!");
+      try {
+        const res = await fetch(`http://localhost:5000/bookings/${id}`, {
+          method: 'DELETE'
+        });
+        const data = await res.json();
+        
+        if(data.success) {
+          setBookings(bookings.filter((b) => b._id !== id));
+          toast.success("Appointment deleted successfully!");
+        }
+      } catch (error) {
+        toast.error("Failed to delete appointment");
+      }
     }
   };
 
+ 
   const handleOpenUpdate = (booking) => {
     setSelectedBooking(booking);
     setIsUpdateModalOpen(true);
   };
 
-  const handleUpdateSubmit = (e) => {
+  const handleUpdateSubmit = async (e) => {
     e.preventDefault();
     const form = e.target;
     
     const updatedData = {
-      ...selectedBooking,
+      patientName: form.patientName.value,
+      phone: form.phone.value,
       date: form.date.value,
       time: form.time.value,
-      phone: form.phone.value,
-      patientName: form.patientName.value
     };
 
-    setBookings(bookings.map((b) => (b._id === selectedBooking._id ? updatedData : b)));
-    setIsUpdateModalOpen(false);
-    toast.success("Appointment updated successfully!");
+    try {
+      const res = await fetch(`http://localhost:5000/bookings/${selectedBooking._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedData)
+      });
+      
+      const data = await res.json();
+      
+      if(data.success) {
+        setBookings(bookings.map((b) => (b._id === selectedBooking._id ? { ...b, ...updatedData } : b)));
+        setIsUpdateModalOpen(false);
+        toast.success("Appointment updated successfully!");
+      }
+    } catch (error) {
+      toast.error("Failed to update appointment");
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-[#0b6654]"></div>
+        <p className="mt-4 text-gray-500 font-medium">Loading your appointments...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -77,14 +116,17 @@ export default function MyBookingsPage() {
 
       <div className="space-y-4">
         {bookings.length === 0 ? (
-          <p className="text-gray-500 text-center py-10 bg-white rounded-xl border border-gray-100">You have no booked appointments.</p>
+          <div className="text-center py-16 bg-white rounded-xl border border-gray-100 shadow-sm">
+            <h3 className="text-lg font-bold text-[#112a36] mb-2">No Appointments Yet</h3>
+            <p className="text-gray-500">You have not booked any doctors. Go to the Doctors page to book one!</p>
+          </div>
         ) : (
           bookings.map((booking) => (
             <div key={booking._id} className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row items-center gap-6">
               
               <div className="flex items-center gap-4 w-full md:w-1/3">
                 <div className="w-16 h-16 bg-gray-100 rounded-full overflow-hidden flex-shrink-0 border border-gray-200">
-                  <img src={booking.image} alt={booking.doctorName} className="w-full h-full object-cover object-top" />
+                  <img src={booking.image || "https://i.ibb.co/M91sZKj/default-avatar.png"} alt={booking.doctorName} className="w-full h-full object-cover object-top" />
                 </div>
                 <div>
                   <h3 className="font-bold text-[#112a36] text-sm md:text-base">{booking.doctorName}</h3>
@@ -133,7 +175,6 @@ export default function MyBookingsPage() {
                   </button>
                 </div>
               </div>
-
             </div>
           ))
         )}
